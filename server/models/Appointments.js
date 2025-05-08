@@ -1,14 +1,16 @@
 const mongoose = require("mongoose");
 
-const UserSchema = new mongoose.Schema(
+const AppointmentsSchema = new mongoose.Schema(
   {
-    patientId: { type: Number, required: true },
-    dateTimeSchedule: { type: String, required: true, unique: true },
-    serviceId: { type: String },
+    name: { type: String },
+    email: { type: String, required: true },
+    phone: { type: String, required: true },
+    dateTime: { type: Date, required: true },
+    serviceId: { type: String, required: true },
     dentistId: { type: String, required: true },
-    status: { type: String, required: true, default: "pending" },
+    status: { type: String, default: "confirmed" }, //confirmed, cancelled
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("User", UserSchema);
+module.exports = mongoose.model("Appointments", AppointmentsSchema);

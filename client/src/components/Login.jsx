@@ -2,23 +2,54 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const [errorMsg, setErrorMsg] = useState("");
+  const navigate = useNavigate();
+  const [message, setMessage] = useState("");
+  const [colorMsg, setColorMsg] = useState("text-green-500");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     try {
-      const user = loginUser(email, password);
-      // Redirect to dashboard page
-      if (typeof user !== "undefined") {
-        navigate("/dashboard");
-      } else console.log("There was an error encountered.");
+      // const { authorized, data } = loginUser(email, password);
+      loginUser(email, password);
     } catch (err) {
-      setErrorMsg(err.message);
+      console.log(err);
+      // setErrorMsg(err.message);
     }
+  };
+
+  const loginUser = async (email, password) => {
+    fetch("http://localhost:5000/api/validateLogin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status) {
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("userId", data.user.id);
+          localStorage.setItem("name", data.user.name);
+          localStorage.setItem("email", data.user.email);
+          localStorage.setItem("phone", data.user.phone);
+
+          // Redirect to dashboard page
+          setMessage("Redirecting..");
+          setColorMsg("text-green-500");
+          setTimeout(() => {
+            navigate("/dashboard");
+          }, 1000);
+        } else {
+          setMessage(data.message);
+          setColorMsg("text-red-400");
+        }
+      })
+      .catch((err) => {
+        setMessage("There was an error encountered.");
+        setColorMsg("text-red-400");
+        // throw new Error(err.message);
+      });
   };
 
   const changeEmail = (e) => {
@@ -36,7 +67,7 @@ const Login = () => {
           Welcome to BrighterSmile!
         </h2>
 
-        <p className="text-red-400">{errorMsg}</p>
+        <p className={colorMsg}>{message}</p>
         <form method="POST" className="space-y-5" onSubmit={handleSubmit}>
           <div>
             <label
@@ -106,25 +137,6 @@ const Login = () => {
       </div>
     </div>
   );
-};
-
-const loginUser = async (email, password) => {
-  fetch("http://localhost:5000/api/validateLogin", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("userId", data.user.id);
-      localStorage.setItem("name", data.user.name);
-      localStorage.setItem("email", data.user.email);
-      return data.user;
-    })
-    .catch((err) => {
-      throw new Error(err.message);
-    });
 };
 
 export default Login;

@@ -5,10 +5,10 @@ const Homepage = () => {
   const [services, setServices] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:5000/services")
-      .then((data) => data.json())
-      .then((result) => {
-        setServices(result);
+    fetch("http://localhost:5000/api/services")
+      .then((res) => res.json())
+      .then((data) => {
+        setServices(data);
       });
   }, []);
 
@@ -63,8 +63,8 @@ const Homepage = () => {
             Our Services
           </h2>
           <ul className="list-disc list-inside space-y-1">
-            {services.map((service, i) => {
-              return <li key={i}>{service.description}</li>;
+            {services.map(({ name }, i) => {
+              return <li key={i}>{name}</li>;
             })}
           </ul>
         </section>

@@ -24,7 +24,7 @@ mongoose
   });
 
 // fetch all appointments of the specific user
-app.get("/api/:id/appointments", (req, res) => {
+/* app.get("/api/:id/appointments", (req, res) => {
   res.status(200).json([
     {
       date: "May 10, 2025",
@@ -55,10 +55,10 @@ app.get("/api/:id/appointments", (req, res) => {
       status: "Rejected",
     },
   ]);
-});
+});*/
 
-// fetch all doctors
-app.get("/dentists", (req, res) => {
+// fetch all dentists
+/* app.get("/dentists", (req, res) => {
   res.status(200).json([
     {
       id: 1,
@@ -81,10 +81,10 @@ app.get("/dentists", (req, res) => {
       title: "DMD",
     },
   ]);
-});
+});*/
 
 // fetch all available services
-app.get("/services", (req, res) => {
+/* app.get("/services", (req, res) => {
   res.status(200).json([
     {
       id: 1,
@@ -107,7 +107,7 @@ app.get("/services", (req, res) => {
       description: "Emergency Care",
     },
   ]);
-});
+});*/
 
 // Start server
 const PORT = process.env.PORT || 5000;

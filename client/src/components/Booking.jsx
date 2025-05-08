@@ -1,4 +1,104 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 function Booking() {
+  const [dentists, setDentists] = useState([]);
+  const [services, setServices] = useState([]);
+
+  const [fullname, setFullname] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [dentistId, setDentist] = useState(0);
+  const [dateTime, setDateTime] = useState("");
+  const [serviceId, setService] = useState(0);
+
+  const navigate = useNavigate();
+
+  const getDentists = () => {
+    fetch("http://localhost:5000/api/dentists")
+      .then((res) => res.json())
+      .then((data) => {
+        setDentists(data);
+      })
+      .catch((err) => {
+        throw new Error(err.message);
+      });
+  };
+
+  const getServices = () => {
+    fetch("http://localhost:5000/api/services")
+      .then((res) => res.json())
+      .then((data) => {
+        setServices(data);
+      })
+      .catch((err) => {
+        throw new Error(err.message);
+      });
+  };
+
+  useEffect(() => {
+    getDentists();
+    getServices();
+  }, []);
+
+  const bookAppointment = async (
+    fullname,
+    email,
+    phone,
+    dentistId,
+    dateTime,
+    serviceId
+  ) => {
+    console.log({
+      fullname,
+      email,
+      phone,
+      dentistId,
+      dateTime,
+      serviceId,
+    });
+
+    fetch("http://localhost:5000/api/book", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fullname,
+        email,
+        phone,
+        dentistId,
+        dateTime,
+        serviceId,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        return data.user;
+      })
+      .catch((err) => {
+        throw new Error(err.message);
+      });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    try {
+      const user = bookAppointment(
+        fullname,
+        email,
+        phone,
+        dentistId,
+        dateTime,
+        serviceId
+      );
+      // Redirect to homepage
+      if (typeof user !== "undefined") {
+        navigate("/");
+      } else console.log("There was an error encountered.");
+    } catch (err) {
+      // setErrorMsg(err.message);
+    }
+  };
+
   return (
     <>
       <header className="bg-cyan-600 text-white py-6 text-center">
@@ -7,65 +107,89 @@ function Booking() {
       </header>
 
       <main className="max-w-xl mx-auto mt-10 bg-white p-8 rounded shadow-md">
-        <form action="#" method="POST" className="space-y-6">
+        <form
+          action="#"
+          method="POST"
+          className="space-y-6"
+          onSubmit={handleSubmit}
+        >
           <div>
-            <label for="name" className="block text-sm font-medium">
+            <label htmlFor="name" className="block text-sm font-medium">
               Full Name
             </label>
             <input
               type="text"
               id="name"
               name="name"
+              value={fullname}
+              onChange={(e) => {
+                setFullname(e.target.value);
+              }}
               required
               className="mt-1 w-full border border-gray-300 rounded px-4 py-2 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
             />
           </div>
 
           <div>
-            <label for="email" className="block text-sm font-medium">
+            <label htmlFor="email" className="block text-sm font-medium">
               Email
             </label>
             <input
               type="email"
               id="email"
               name="email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+              }}
               required
               className="mt-1 w-full border border-gray-300 rounded px-4 py-2 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
             />
           </div>
 
           <div>
-            <label for="phone" className="block text-sm font-medium">
+            <label htmlFor="phone" className="block text-sm font-medium">
               Phone Number
             </label>
             <input
               type="tel"
               id="phone"
               name="phone"
+              value={phone}
+              onChange={(e) => {
+                setPhone(e.target.value);
+              }}
               className="mt-1 w-full border border-gray-300 rounded px-4 py-2 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
             />
           </div>
 
           <div>
-            <label for="dentist" className="block text-sm font-medium">
+            <label htmlFor="dentist" className="block text-sm font-medium">
               Preferred Dentist
             </label>
             <select
               id="dentist"
               name="dentist"
               required
+              onChange={(e) => {
+                setDentist(e.target.value);
+              }}
+              value={dentistId}
               className="mt-1 w-full border border-gray-300 rounded px-4 py-2 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
             >
               <option value="">Select a Dentist</option>
-              <option>Dr. Olivia Hart, DDS</option>
-              <option>Dr. Marcus Lin, DMD</option>
-              <option>Dr. Priya Shah, DDS</option>
-              <option>Dr. James Caldwell, DMD</option>
+              {dentists.map(({ _id, name, title }, i) => {
+                return (
+                  <option key={i} value={_id}>
+                    {name}, {title}
+                  </option>
+                );
+              })}
             </select>
           </div>
 
           <div>
-            <label for="date" className="block text-sm font-medium">
+            <label htmlFor="date" className="block text-sm font-medium">
               Preferred Date
             </label>
             {/* set the minimum date at least */}
@@ -79,27 +203,37 @@ function Booking() {
               )
                 .toISOString()
                 .slice(0, 16)}
+              value={dateTime}
+              onChange={(e) => {
+                setDateTime(e.target.value);
+              }}
               required
               className="mt-1 w-full border border-gray-300 rounded px-4 py-2 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
             />
           </div>
 
           <div>
-            <label for="service" className="block text-sm font-medium">
+            <label htmlFor="service" className="block text-sm font-medium">
               Service Type
             </label>
             <select
               id="service"
               name="service"
               required
+              onChange={(e) => {
+                setService(e.target.value);
+              }}
+              value={serviceId}
               className="mt-1 w-full border border-gray-300 rounded px-4 py-2 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
             >
               <option value="">Select a service</option>
-              <option>Routine Check-up</option>
-              <option>Teeth Whitening</option>
-              <option>Dental Implants</option>
-              <option>Braces / Invisalign</option>
-              <option>Emergency Care</option>
+              {services.map(({ _id, name }, i) => {
+                return (
+                  <option key={i} value={_id}>
+                    {name}
+                  </option>
+                );
+              })}
             </select>
           </div>
 

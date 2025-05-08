@@ -1,34 +1,66 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function Register() {
-  const [errorMsg, setErrorMsg] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+function Profile() {
+  const id = localStorage.getItem("userId");
+  const email = localStorage.getItem("email");
+
+  const [message, setMessage] = useState("");
+  const [colorMsg, setColorMsg] = useState("text-green-500");
+  const [name, setName] = useState(localStorage.getItem("name"));
+  const [phone, setPhone] = useState(localStorage.getItem("phone"));
   const [password, setPassword] = useState("");
+  const [cpassword, setCPassword] = useState("");
 
   const navigate = useNavigate();
+
+  const updateUser = async (id, name, email, phone, password) => {
+    fetch(`http://localhost:5000/api/profileupdate/${id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, phone, password }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Profile:updateUser", data);
+        if (data.status) {
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("userId", data.user.id);
+          localStorage.setItem("name", data.user.name);
+          localStorage.setItem("email", data.user.email);
+          localStorage.setItem("phone", data.user.phone);
+
+          // Redirect to dashboard page
+          setMessage("Redirecting..");
+          setColorMsg("text-green-500");
+          setTimeout(() => {
+            navigate("/dashboard");
+          }, 1000);
+        } else {
+          setMessage(data.message);
+          setColorMsg("text-red-400");
+        }
+      })
+      .catch((err) => {
+        throw new Error(err.message);
+      });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     try {
-      const user = registerUser(name, email, phone, password);
-      // Redirect to login page
-      if (typeof user !== "undefined") {
-        navigate("/login");
-      } else console.log("There was an error encountered.");
+      if (password === cpassword) updateUser(id, name, email, phone, password);
+      else {
+        setMessage("Passwords do not match.");
+        setColorMsg("text-red-400");
+      }
     } catch (err) {
-      setErrorMsg(err.message);
+      setMessage(err.message);
     }
   };
 
   const changeName = (e) => {
     setName(e.target.value);
-  };
-
-  const changeEmail = (e) => {
-    setEmail(e.target.value);
   };
 
   const changePhone = (e) => {
@@ -39,14 +71,18 @@ function Register() {
     setPassword(e.target.value);
   };
 
+  const changeCPassword = (e) => {
+    setCPassword(e.target.value);
+  };
+
   return (
     <div className="bg-cyan-50 min-h-screen flex items-center justify-center">
       <div className="w-full max-w-lg bg-white p-8 rounded shadow-md">
         <h2 className="text-2xl font-bold text-cyan-600 text-center mb-6">
-          Create Your Account
+          Manage Your Profile
         </h2>
 
-        <p className="text-red-400">{errorMsg}</p>
+        <p className={colorMsg}>{message}</p>
         <form
           action="#"
           method="POST"
@@ -83,8 +119,7 @@ function Register() {
               id="email"
               name="email"
               value={email}
-              onChange={changeEmail}
-              required
+              disabled
               className="w-full border border-gray-300 px-4 py-2 rounded focus:ring-2 focus:ring-cyan-500 focus:outline-none"
             />
           </div>
@@ -136,6 +171,8 @@ function Register() {
               type="password"
               id="confirm-password"
               name="confirm-password"
+              value={cpassword}
+              onChange={changeCPassword}
               required
               className="w-full border border-gray-300 px-4 py-2 rounded focus:ring-2 focus:ring-cyan-500 focus:outline-none"
             />
@@ -146,42 +183,18 @@ function Register() {
               type="submit"
               className="w-full bg-cyan-600 text-white font-semibold py-2 px-4 rounded hover:bg-cyan-700 transition"
             >
-              Register
+              Update
             </button>
           </div>
+          <div className="text-sm text-center mt-3">
+            <a href="/dashboard" className="text-cyan-600 hover:underline">
+              Back to Dashboard page
+            </a>
+          </div>
         </form>
-
-        <p className="text-center text-sm mt-6 text-gray-600">
-          Already have an account?{" "}
-          <a
-            href="/login"
-            className="text-cyan-600 hover:underline font-medium"
-          >
-            Log in
-          </a>
-          {" | "}
-          <a href="/" className="text-cyan-600 hover:underline">
-            Back to Homepage
-          </a>
-        </p>
       </div>
     </div>
   );
 }
 
-const registerUser = async (name, email, phone, password) => {
-  fetch("http://localhost:5000/api/register", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, email, phone, password }),
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      return data.user;
-    })
-    .catch((err) => {
-      throw new Error(err.message);
-    });
-};
-
-export default Register;
+export default Profile;
