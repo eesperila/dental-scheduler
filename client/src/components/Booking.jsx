@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { format, toZonedTime } from "date-fns-tz";
+import Swal from "sweetalert2";
 
 function Booking() {
   const [dentists, setDentists] = useState([]);
@@ -13,6 +15,7 @@ function Booking() {
   const [serviceId, setService] = useState(0);
 
   const navigate = useNavigate();
+  const { id } = useParams();
 
   const getDentists = () => {
     fetch("http://localhost:5000/api/dentists")
@@ -36,10 +39,54 @@ function Booking() {
       });
   };
 
+  const getAppointment = () => {
+    fetch(`http://localhost:5000/api/appointment/${id}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status) {
+          const { name, email, phone, serviceId, dentistId, dateTime } =
+            data.appointment;
+
+          let schedDate = toZonedTime(dateTime, "Asia/Manila");
+          schedDate = format(schedDate, "yyyy-MM-dd HH:mm", {
+            timeZone: "Asia/Manila",
+          });
+
+          setFullname(name);
+          setEmail(email);
+          setPhone(phone);
+          setService(serviceId);
+          setDentist(dentistId);
+          setDateTime(schedDate);
+        }
+      })
+      .catch((err) => {
+        throw new Error(err.message);
+      });
+  };
+
   useEffect(() => {
+    checkAppointment();
     getDentists();
     getServices();
+    getAppointment();
   }, []);
+
+  const checkAppointment = () => {
+    if (id) {
+      fetch(`http://localhost:5000/api/appointment/${id}`)
+        .then((res) => {
+          if (res.status === 404 || res.status === 400) {
+            navigate("*");
+          }
+          return res.json();
+        })
+        .then((data) => {});
+    }
+  };
 
   const bookAppointment = async (
     fullname,
@@ -49,16 +96,7 @@ function Booking() {
     dateTime,
     serviceId
   ) => {
-    console.log({
-      fullname,
-      email,
-      phone,
-      dentistId,
-      dateTime,
-      serviceId,
-    });
-
-    fetch("http://localhost:5000/api/book", {
+    fetch(`http://localhost:5000/api/book/${id ? id : ""}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -72,7 +110,7 @@ function Booking() {
     })
       .then((res) => res.json())
       .then((data) => {
-        return data.user;
+        return data;
       })
       .catch((err) => {
         throw new Error(err.message);
@@ -82,18 +120,42 @@ function Booking() {
   const handleSubmit = (e) => {
     e.preventDefault();
     try {
-      const user = bookAppointment(
-        fullname,
-        email,
-        phone,
-        dentistId,
-        dateTime,
-        serviceId
-      );
-      // Redirect to homepage
-      if (typeof user !== "undefined") {
-        navigate("/");
-      } else console.log("There was an error encountered.");
+      Swal.fire({
+        title: "Are you sure?",
+        text: "This appointment will be saved to the database.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#00ACC1",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Book Appointment",
+        cancelButtonText: "Cancel",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const appointment = bookAppointment(
+            fullname,
+            email,
+            phone,
+            dentistId,
+            dateTime,
+            serviceId
+          );
+          // Redirect to homepage / dashboard page
+          if (typeof appointment !== "undefined") {
+            const dateSched = new Date(dateTime);
+            const formattedDate = format(dateSched, "MMM dd, yyyy");
+            const formattedTime = format(dateSched, "hh:mm a");
+            Swal.fire({
+              title: "Appointment Booked!",
+              icon: "success",
+              text: `See you on ${formattedDate} at ${formattedTime}!`,
+              confirmButtonColor: "#00ACC1",
+            });
+
+            if (id) navigate("/dashboard");
+            else navigate("/");
+          } else console.log("There was an error encountered.");
+        }
+      });
     } catch (err) {
       // setErrorMsg(err.message);
     }
@@ -142,6 +204,7 @@ function Booking() {
               onChange={(e) => {
                 setEmail(e.target.value);
               }}
+              disabled={id}
               required
               className="mt-1 w-full border border-gray-300 rounded px-4 py-2 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
             />
@@ -242,7 +305,7 @@ function Booking() {
               type="submit"
               className="bg-cyan-600 text-white px-6 py-2 rounded hover:bg-cyan-700 transition font-semibold"
             >
-              Submit Appointment Request
+              {id ? "Edit Appointment" : "Submit Appointment Request"}
             </button>
           </div>
           <div className="text-center">

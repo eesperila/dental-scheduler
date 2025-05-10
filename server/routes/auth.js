@@ -1,11 +1,13 @@
-const express = require("express");
-const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const express = require("express");
+const mongoose = require("mongoose");
+
 const User = require("../models/User");
-const Appointments = require("../models/Appointments");
+const auth = require("../middleware/auth");
 const Services = require("../models/Services");
 const Dentists = require("../models/Dentists");
-const auth = require("../middleware/auth");
+const Appointments = require("../models/Appointments");
 
 const app = express();
 app.use(express.json());
@@ -177,11 +179,108 @@ router.post("/book", async (req, res) => {
   }
 });
 
+router.post("/book/:id", async (req, res) => {
+  try {
+    const { fullname, email, phone, dentistId, dateTime, serviceId } = req.body;
+
+    const updateFields = {
+      name: fullname,
+      email,
+      phone,
+      dateTime,
+      dentistId,
+      serviceId,
+    };
+
+    const service = await Services.findById(serviceId);
+    if (!service)
+      return res
+        .status(400)
+        .json({ status: false, message: "Invalid service type." });
+
+    const dentist = await Dentists.findById(dentistId);
+    if (!dentist)
+      return res
+        .status(400)
+        .json({ status: false, message: "Dentist does not exist." });
+
+    // Check for existing appointment
+    const updatedAppointment = await Appointments.findByIdAndUpdate(
+      req.params.id,
+      { $set: updateFields },
+      { new: true } // return updated doc
+    );
+
+    await updatedAppointment.save();
+    res.status(201).json({
+      status: true,
+      message: "Rescheduling an appointment is successful.",
+    });
+  } catch (err) {
+    res.status(500).json({ status: false, message: err.message });
+  }
+});
+
 router.post("/appointments", async (req, res) => {
   const { email } = req.body;
-  const appointments = await Appointments.find({ email });
-  console.log(appointments);
+  const appointments = await Appointments.aggregate([
+    { $match: { email } },
+    {
+      $lookup: {
+        from: "dentists",
+        localField: "dentistId",
+        foreignField: "_id",
+        as: "dentist",
+      },
+    },
+    { $unwind: "$dentist" },
+    {
+      $lookup: {
+        from: "services",
+        localField: "serviceId",
+        foreignField: "_id",
+        as: "service",
+      },
+    },
+    { $unwind: "$service" },
+  ]);
   res.status(200).json(appointments);
+});
+
+router.get("/appointment/:id", async (req, res) => {
+  try {
+    const _id = new mongoose.Types.ObjectId(req.params.id);
+    const appointment = await Appointments.findOne({ _id });
+    if (appointment) res.status(201).json({ status: true, appointment });
+    else
+      res.status(404).json({
+        status: false,
+        message: "Appointment schedule was not found.",
+      });
+  } catch (err) {
+    res
+      .status(400)
+      .json({ status: false, message: "Appointment schedule was not found." });
+  }
+});
+
+router.get("/appointments/cancel/:id", async (req, res) => {
+  try {
+    const _id = new mongoose.Types.ObjectId(req.params.id);
+    const appointment = await Appointments.findOneAndDelete({ _id });
+    if (appointment)
+      res.status(201).json({
+        status: true,
+        message: "The appointment schedule was successfully deleted.",
+      });
+    else
+      res.status(400).json({
+        status: false,
+        message: "Appointment schedule was not deleted.",
+      });
+  } catch (err) {
+    res.status(500).json({ status: false, message: err.message });
+  }
 });
 
 router.get("/dentists", async (req, res) => {

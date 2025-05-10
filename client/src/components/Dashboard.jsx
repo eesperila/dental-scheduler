@@ -1,41 +1,42 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import Swal from "sweetalert2";
 
 function Dashboard() {
   const name = localStorage.getItem("name");
   const [appointments, setAppointments] = useState([]);
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
 
   const navigate = useNavigate();
 
   // get the stored appointment details
   useEffect(() => {
-    getAppointments(localStorage.getItem("email"));
+    getAppointments();
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("token"); // Clear auth token
-    localStorage.removeItem("name"); // Clear auth token
-    localStorage.removeItem("userId"); // Clear auth token
-    localStorage.removeItem("email"); // Clear auth token
-    navigate("/login"); // Redirect to login page
+    Swal.fire({
+      title: "Are you sure?",
+      text: "The current session will be logged out.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#00ACC1",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, logout",
+      cancelButtonText: "Cancel",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        localStorage.removeItem("token"); // Clear auth token
+        localStorage.removeItem("name"); // Clear auth token
+        localStorage.removeItem("userId"); // Clear auth token
+        localStorage.removeItem("email"); // Clear auth token
+        navigate("/login"); // Redirect to login page
+      }
+    });
   };
 
-  const getAppointments = (email) => {
+  const getAppointments = () => {
+    const email = localStorage.getItem("email");
     fetch("http://localhost:5000/api/appointments", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -45,6 +46,36 @@ function Dashboard() {
       .then((data) => {
         setAppointments(data);
       });
+  };
+
+  const cancelAppointment = (e, id) => {
+    e.preventDefault();
+
+    Swal.fire({
+      title: "Are you sure?",
+      text: "This appointment will be permanently deleted.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#00ACC1",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Cancel Appointment",
+      cancelButtonText: "Cancel",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`http://localhost:5000/api/appointments/cancel/${id ? id : ""}`)
+          .then((res) => res.json())
+          .then((data) => {
+            console.log("Refreshing the dashboard page.");
+            Swal.fire(
+              "Deleted!",
+              "The appointment has been cancelled.",
+              "success"
+            );
+            navigate("/dashboard");
+            getAppointments();
+          });
+      }
+    });
   };
 
   return (
@@ -82,34 +113,67 @@ function Dashboard() {
                 <tr>
                   <th className="py-2 px-4 border-b">Date</th>
                   <th className="py-2 px-4 border-b">Time</th>
+                  <th className="py-2 px-4 border-b">Phone</th>
                   <th className="py-2 px-4 border-b">Service</th>
                   <th className="py-2 px-4 border-b">Dentist</th>
-                  {/* <th className="py-2 px-4 border-b">Status</th> */}
+                  <th className="py-2 px-4 border-b"></th>
                 </tr>
               </thead>
               <tbody className="text-sm">
-                {appointments.map(({ dateTime, serviceId, dentistId }, i) => {
-                  // const schedule = new Date(dateTime);
-                  // const year = schedule.getFullYear();
-                  // const month = schedule.getMonth();
-                  // const day = schedule.getDate().toString().padStart(2, "0");
+                {appointments.map(
+                  ({ _id, dateTime, service, dentist, phone }, i) => {
+                    const dateSched = new Date(dateTime);
+                    const formattedDate = format(dateSched, "MMM dd, yyyy");
+                    const formattedTime = format(dateSched, "hh:mm a");
 
-                  // const dateSched = `${months[month]} ${day}, ${year}`;
-                  // const timeSched = "10:30 AM";
+                    return (
+                      <tr className="hover:bg-gray-50" key={i}>
+                        <td className="py-2 px-4 border-b">{formattedDate}</td>
+                        <td className="py-2 px-4 border-b">{formattedTime}</td>
+                        <td className="py-2 px-4 border-b">{phone}</td>
+                        <td className="py-2 px-4 border-b">{service.name}</td>
+                        <td className="py-2 px-4 border-b">
+                          {dentist.name}, {dentist.title}
+                        </td>
+                        <td className="py-2 px-4 border-b">
+                          <a
+                            href={`/appointments/edit/${_id}`}
+                            className="text-cyan-600 hover:underline"
+                            title="Edit appointment"
+                          >
+                            <i className="fa-solid fa-pen-to-square"></i>Edit
+                          </a>
+                          &nbsp;&nbsp;&nbsp;
+                          <a
+                            href={`/appointments/cancel/${_id}`}
+                            className="text-red-600 hover:underline"
+                            title="Cancel appointment"
+                            onClick={(e) => cancelAppointment(e, `${_id}`)}
+                          >
+                            <i className="fa-solid fa-trash"></i>Cancel
+                          </a>
+                        </td>
+                      </tr>
+                    );
+                  }
+                )}
 
-                  const dateSched = new Date(dateTime);
-                  const formattedDate = format(dateSched, "MMM dd, yyyy");
-                  const formattedTime = format(dateSched, "hh:mm a");
-
-                  return (
-                    <tr className="hover:bg-gray-50" key={i}>
-                      <td className="py-2 px-4 border-b">{formattedDate}</td>
-                      <td className="py-2 px-4 border-b">{formattedTime}</td>
-                      <td className="py-2 px-4 border-b">{serviceId}</td>
-                      <td className="py-2 px-4 border-b">{dentistId}</td>
-                    </tr>
-                  );
-                })}
+                {appointments.length === 0 && (
+                  <tr className="hover:bg-gray-50">
+                    <td
+                      colSpan="6"
+                      className="py-2 px-4 border-b border-l border-r text-center"
+                    >
+                      No scheduled appointments.{" "}
+                      {/* <a
+                        href="/appointment"
+                        className="text-red-600 hover:underline"
+                      >
+                        Book Now!
+                      </a> */}
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -10,13 +11,7 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      // const { authorized, data } = loginUser(email, password);
-      loginUser(email, password);
-    } catch (err) {
-      console.log(err);
-      // setErrorMsg(err.message);
-    }
+    loginUser(email, password);
   };
 
   const loginUser = async (email, password) => {
@@ -34,12 +29,15 @@ const Login = () => {
           localStorage.setItem("email", data.user.email);
           localStorage.setItem("phone", data.user.phone);
 
-          // Redirect to dashboard page
-          setMessage("Redirecting..");
-          setColorMsg("text-green-500");
-          setTimeout(() => {
+          Swal.fire({
+            title: "Account validated!",
+            text: "Redirecting to dashboard..",
+            icon: "success",
+            timer: 1000, // Auto-close after 1 second
+            showConfirmButton: false, // Hide the "OK" button
+          }).then((result) => {
             navigate("/dashboard");
-          }, 1000);
+          });
         } else {
           setMessage(data.message);
           setColorMsg("text-red-400");
@@ -115,12 +113,12 @@ const Login = () => {
           </div>
 
           <div className="text-sm text-center mt-3">
-            <a href="/forgotpassword" className="text-cyan-600 hover:underline">
+            {/* <a href="/forgotpassword" className="text-cyan-600 hover:underline">
               Forgot password?
             </a>
-            {" | "}
+            {" | "} */}
             <a href="/" className="text-cyan-600 hover:underline">
-              Back to Homepage
+              Go to Homepage
             </a>
           </div>
         </form>

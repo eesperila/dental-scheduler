@@ -1,11 +1,12 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Homepage from "./components/Homepage";
-import Booking from "./components/Booking";
 import Login from "./components/Login";
-import Dashboard from "./components/Dashboard";
-import Register from "./components/Register";
+import Booking from "./components/Booking";
 import Profile from "./components/Profile";
+import Register from "./components/Register";
+import NotFound from "./components/NotFound";
+import Homepage from "./components/Homepage";
+import Dashboard from "./components/Dashboard";
 
 function App() {
   return (
@@ -13,11 +14,14 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Homepage />} />
-          <Route path="/appointment" element={<Booking />} />
+          <Route path="*" element={<NotFound />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/appointment" element={<Booking />} />
+          <Route path="/appointments/edit/:id" element={<Booking />} />
+          <Route path="/appointments/cancel/:id" element={<Booking />} />
         </Routes>
       </Router>
     </>

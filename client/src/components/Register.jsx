@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 function Register() {
   const [errorMsg, setErrorMsg] = useState("");
@@ -13,11 +14,32 @@ function Register() {
   const handleSubmit = (e) => {
     e.preventDefault();
     try {
-      const user = registerUser(name, email, phone, password);
-      // Redirect to login page
-      if (typeof user !== "undefined") {
-        navigate("/login");
-      } else console.log("There was an error encountered.");
+      Swal.fire({
+        title: "Do you want to continue?",
+        text: "The information will be saved to the database.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#00ACC1",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, continue",
+        cancelButtonText: "Cancel",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const user = registerUser(name, email, phone, password);
+          // Redirect to login page
+          if (typeof user !== "undefined") {
+            Swal.fire({
+              title: "Account has been saved!",
+              text: "Redirecting to login page..",
+              icon: "success",
+              timer: 1000, // Auto-close after 1 second
+              showConfirmButton: false, // Hide the "OK" button
+            }).then((result) => {
+              navigate("/login");
+            });
+          } else console.log("There was an error encountered.");
+        }
+      });
     } catch (err) {
       setErrorMsg(err.message);
     }

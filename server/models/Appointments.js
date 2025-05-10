@@ -6,8 +6,16 @@ const AppointmentsSchema = new mongoose.Schema(
     email: { type: String, required: true },
     phone: { type: String, required: true },
     dateTime: { type: Date, required: true },
-    serviceId: { type: String, required: true },
-    dentistId: { type: String, required: true },
+    serviceId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Services",
+      required: true,
+    },
+    dentistId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Dentists",
+      required: true,
+    },
     status: { type: String, default: "confirmed" }, //confirmed, cancelled
   },
   { timestamps: true }
