@@ -1,6 +1,7 @@
 ## Running the Server
 
 - Go to `dental-scheduler/server` directory
+- Run `npm install`
 - Run `npm start`. Make sure to run the server and the MongoDB \
   🚀 Server running on port 5000 \
   ✅ MongoDB connected successfully

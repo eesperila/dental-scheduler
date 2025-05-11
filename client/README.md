@@ -1,6 +1,7 @@
 # Pre-requisite
 
 - Go to `dental-scheduler/server` directory
+- Run `npm install`
 - Run `npm start`. Make sure to run the server and the MongoDB \
   🚀 Server running on port 5000 \
   ✅ MongoDB connected successfully
@@ -8,6 +9,7 @@
 ## Running the React App
 
 - Go to `dental-scheduler/client` directory
+- Run `npm install`
 - Run `npm start`. The app will be running on port `3000`
 - Go to `http://localhost:3000` in the browser
 - This page should display the homepage of the Dental Scheduler app
