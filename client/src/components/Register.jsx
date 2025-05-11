@@ -16,7 +16,7 @@ function Register() {
   const handleSubmit = (e) => {
     e.preventDefault();
     try {
-      if (password === cPassword) {
+      if (password == cPassword) {
         Swal.fire({
           title: "Do you want to continue?",
           text: "The information will be saved to the database.",
@@ -173,6 +173,8 @@ function Register() {
               type="password"
               id="confirm-password"
               name="confirm-password"
+              value={cPassword}
+              onChange={changeCPassword}
               required
               className="w-full border border-gray-300 px-4 py-2 rounded focus:ring-2 focus:ring-cyan-500 focus:outline-none"
             />
