@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_URL } from "../config";
+import Swal from "sweetalert2";
 
 function Profile() {
   const id = localStorage.getItem("userId");
@@ -23,7 +24,6 @@ function Profile() {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log("Profile:updateUser", data);
         if (data.status) {
           localStorage.setItem("token", data.token);
           localStorage.setItem("userId", data.user.id);
@@ -31,12 +31,15 @@ function Profile() {
           localStorage.setItem("email", data.user.email);
           localStorage.setItem("phone", data.user.phone);
 
-          // Redirect to dashboard page
-          setMessage("Redirecting..");
-          setColorMsg("text-green-500");
-          setTimeout(() => {
+          Swal.fire({
+            title: "Profile saved!",
+            text: "Redirecting to dashboard..",
+            icon: "success",
+            timer: 1000, // Auto-close after 1 second
+            showConfirmButton: false, // Hide the "OK" button
+          }).then((result) => {
             navigate("/dashboard");
-          }, 1000);
+          });
         } else {
           setMessage(data.message);
           setColorMsg("text-red-400");
@@ -52,8 +55,12 @@ function Profile() {
     try {
       if (password === cpassword) updateUser(id, name, email, phone, password);
       else {
-        setMessage("Passwords do not match.");
-        setColorMsg("text-red-400");
+        Swal.fire({
+          title: "Passwords did not match!",
+          text: "Please double check your passwords.",
+          icon: "warning",
+          showConfirmButton: false, // Hide the "OK" button
+        });
       }
     } catch (err) {
       setMessage(err.message);

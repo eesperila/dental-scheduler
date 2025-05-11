@@ -16,7 +16,7 @@ function Register() {
   const handleSubmit = (e) => {
     e.preventDefault();
     try {
-      if (password == cPassword) {
+      if (password === cPassword) {
         Swal.fire({
           title: "Do you want to continue?",
           text: "The information will be saved to the database.",

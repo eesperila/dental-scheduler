@@ -47,7 +47,7 @@ router.post("/register", async (req, res) => {
 
     await newUser.save();
 
-    res.status(201).json({ message: "Registration successful." });
+    res.status(201).json({ status: true, message: "Registration successful." });
   } catch (err) {
     res.status(500).json({ message: "Server error." });
   }
@@ -99,7 +99,6 @@ router.post("/profileupdate/:id", async (req, res) => {
   }
 });
 
-// Login endpoint
 router.post("/validateLogin", async (req, res) => {
   const { email, password } = req.body;
 
