@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../config";
 
 function Profile() {
   const id = localStorage.getItem("userId");
@@ -15,7 +16,7 @@ function Profile() {
   const navigate = useNavigate();
 
   const updateUser = async (id, name, email, phone, password) => {
-    fetch(`http://localhost:5000/api/profileupdate/${id}`, {
+    fetch(`${API_URL}/profileupdate/${id}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email, phone, password }),

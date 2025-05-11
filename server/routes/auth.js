@@ -293,9 +293,4 @@ router.get("/services", async (req, res) => {
   res.status(200).json(services);
 });
 
-router.get("/dashboard", auth, (req, res) => {
-  // Only accessible if valid token
-  res.json({ message: "This is your protected dashboard" });
-});
-
 module.exports = router;

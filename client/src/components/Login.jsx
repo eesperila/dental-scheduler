@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../config";
 import Swal from "sweetalert2";
 
 const Login = () => {
@@ -15,7 +16,7 @@ const Login = () => {
   };
 
   const loginUser = async (email, password) => {
-    fetch("http://localhost:5000/api/validateLogin", {
+    fetch(`${API_URL}/validateLogin`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -39,8 +40,12 @@ const Login = () => {
             navigate("/dashboard");
           });
         } else {
-          setMessage(data.message);
-          setColorMsg("text-red-400");
+          Swal.fire({
+            title: data.message,
+            text: "You might have not signed up yet. Please click Sign Up to register.",
+            icon: "success",
+            showConfirmButton: false, // Hide the "OK" button
+          });
         }
       })
       .catch((err) => {
@@ -57,6 +62,11 @@ const Login = () => {
   const changePassword = (e) => {
     setPassword(e.target.value);
   };
+
+  useEffect(() => {
+    if (localStorage.getItem("email") && localStorage.getItem("email") !== "")
+      navigate("/dashboard");
+  });
 
   return (
     <div className="bg-cyan-50 min-h-screen flex items-center justify-center">

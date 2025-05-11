@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import { API_URL } from "../config";
 import Swal from "sweetalert2";
 
 function Dashboard() {
@@ -37,7 +38,7 @@ function Dashboard() {
 
   const getAppointments = () => {
     const email = localStorage.getItem("email");
-    fetch("http://localhost:5000/api/appointments", {
+    fetch(`${API_URL}/appointments`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
@@ -62,7 +63,7 @@ function Dashboard() {
       cancelButtonText: "Cancel",
     }).then((result) => {
       if (result.isConfirmed) {
-        fetch(`http://localhost:5000/api/appointments/cancel/${id ? id : ""}`)
+        fetch(`${API_URL}/appointments/cancel/${id ? id : ""}`)
           .then((res) => res.json())
           .then((data) => {
             console.log("Refreshing the dashboard page.");

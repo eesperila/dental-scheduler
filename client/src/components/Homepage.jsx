@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { API_URL } from "../config";
 
 const Homepage = () => {
   const [services, setServices] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/services")
+    fetch(`${API_URL}/services`)
       .then((res) => res.json())
       .then((data) => {
         setServices(data);

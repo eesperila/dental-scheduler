@@ -1,70 +1,89 @@
-# Getting Started with Create React App
+# Pre-requisite
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+- Go to `dental-scheduler/server` directory
+- Run `npm start`. Make sure to run the server and the MongoDB \
+  🚀 Server running on port 5000 \
+  ✅ MongoDB connected successfully
 
-## Available Scripts
+## Running the React App
 
-In the project directory, you can run:
+- Go to `dental-scheduler/client` directory
+- Run `npm start`. The app will be running on port `3000`
+- Go to `http://localhost:3000` in the browser
+- This page should display the homepage of the Dental Scheduler app
 
-### `npm start`
+## Pre-defined values
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Available Dentists
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+    Dr. Olivia Hart, DDS
+    Dr. Marcus Lin, DMD
+    Dr. Priya Sha, DDS
+    Dr. James Caldwell, DMD
+    Dr. Alexie Santos, DDS
 
-### `npm test`
+### Available Services
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+    Routine Check-up & Cleanings
+    Teeth Whitening
+    Dental Implants
+    Braces / Invisalign
+    Emergency Care
+    Dental Veneers
+    Dental Crowns
+    Cosmetic Fillings
 
-### `npm run build`
+## Booking an Appointment
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- Click the `Book an Appointment` button in the homepage
+- It will redirect you to `/appointment` page.
+  - Fill up the form:
+    - Fullname (Name of the patient, `alphanumeric`)
+    - Email - this will be the identifier that the specific schedule is for that particular patient. They will see the appointment in the `/dashboard` page once they register and login.
+    - Phone Number (contact number of the patient, `numeric`)
+    - Preferred Dentist - this is a pre-defined list of Dentists available in the database (see the `/server/models/Dentists` schema)
+    - Preferred Date and Time
+    - Service Type - this is a pre-defined list of services available in the database (see the `/server/models/Dentists` schema)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Login
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- Click the `Login` button in the homepage to be available to see scheduled appointments
+- It will redirect you to `/login` page.
+  - Fill up the form:
+    - Email (registed email address)
+    - Password (nominated password during the registration)
+- When the account is successfully validated, it will redirect you to `/dashboard` page
 
-### `npm run eject`
+## Sign Up
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- Clicking the `Sign Up` link at the bottom, it will be redirected to `/register` page.
+- Fill up the form:
+  - Full Name
+  - Email
+  - Phone Number
+  - Password
+  - Confirm Password
+- Clicking the `Register` button will save the patient information to the database.
+- It will be redirected to the login page.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Dashboard page
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+- Displays the Appointment schedule for specific patient
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+| Date          | Time     | Phone       | Dentist                 |               |
+| ------------- | -------- | ----------- | ----------------------- | ------------- |
+| May 17, 2025  | 03:00 PM | 09190746385 | Dr. Marcus Lin, DMD     | Edit / Cancel |
+| June 10, 2025 | 12:30 PM | 09207754735 | Dr. Olivia Hart, DDS    | Edit / Cancel |
+| June 22, 2025 | 09:45 AM | 09108473622 | Dr. James Caldwell, DMD | Edit / Cancel |
 
-## Learn More
+### Editing an appointment
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- Clicking the `Edit` link will redirect you to `/appointments/edit/<appointment_id>`
+- The `Edit Appointment` form is similar with `Booking Appointment` but it is pre-poluated.
+- The `Email` field is NOT editable since it is the identifier that relates to the patient.
+- Click the `Edit Appointment` button to confirm the changes.
+- Then the app will be redirected back to the `/dashboard` page to quickly look at the changes made in the appointment.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Cancelling an appointment
 
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- Clicking the `Cancel` link, the app will display a dialog dialog to confirm the cancellation. If you choose to cancel the appointment, your scheduled appointment will be cancelled and it will display a message box confirming the cancellation and it wll just refresh the page.

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { format, toZonedTime } from "date-fns-tz";
+import { API_URL } from "../config";
 import Swal from "sweetalert2";
 
 function Booking() {
@@ -18,7 +19,7 @@ function Booking() {
   const { id } = useParams();
 
   const getDentists = () => {
-    fetch("http://localhost:5000/api/dentists")
+    fetch(`${API_URL}/dentists`)
       .then((res) => res.json())
       .then((data) => {
         setDentists(data);
@@ -29,7 +30,7 @@ function Booking() {
   };
 
   const getServices = () => {
-    fetch("http://localhost:5000/api/services")
+    fetch(`${API_URL}/services`)
       .then((res) => res.json())
       .then((data) => {
         setServices(data);
@@ -40,7 +41,7 @@ function Booking() {
   };
 
   const getAppointment = () => {
-    fetch(`http://localhost:5000/api/appointment/${id}`, {
+    fetch(`${API_URL}/appointment/${id}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     })
@@ -77,7 +78,7 @@ function Booking() {
 
   const checkAppointment = () => {
     if (id) {
-      fetch(`http://localhost:5000/api/appointment/${id}`)
+      fetch(`${API_URL}/appointment/${id}`)
         .then((res) => {
           if (res.status === 404 || res.status === 400) {
             navigate("*");
@@ -96,7 +97,7 @@ function Booking() {
     dateTime,
     serviceId
   ) => {
-    fetch(`http://localhost:5000/api/book/${id ? id : ""}`, {
+    fetch(`${API_URL}/book/${id ? id : ""}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

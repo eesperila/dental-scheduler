@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../config";
 import Swal from "sweetalert2";
 
 function Register() {
@@ -8,38 +9,48 @@ function Register() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [cPassword, setCPassword] = useState("");
 
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     try {
-      Swal.fire({
-        title: "Do you want to continue?",
-        text: "The information will be saved to the database.",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#00ACC1",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, continue",
-        cancelButtonText: "Cancel",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          const user = registerUser(name, email, phone, password);
-          // Redirect to login page
-          if (typeof user !== "undefined") {
-            Swal.fire({
-              title: "Account has been saved!",
-              text: "Redirecting to login page..",
-              icon: "success",
-              timer: 1000, // Auto-close after 1 second
-              showConfirmButton: false, // Hide the "OK" button
-            }).then((result) => {
-              navigate("/login");
-            });
-          } else console.log("There was an error encountered.");
-        }
-      });
+      if (password === cPassword) {
+        Swal.fire({
+          title: "Do you want to continue?",
+          text: "The information will be saved to the database.",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#00ACC1",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Yes, continue",
+          cancelButtonText: "Cancel",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            const user = registerUser(name, email, phone, password);
+            // Redirect to login page
+            if (typeof user !== "undefined") {
+              Swal.fire({
+                title: "Account has been saved!",
+                text: "Redirecting to login page..",
+                icon: "success",
+                timer: 1000, // Auto-close after 1 second
+                showConfirmButton: false, // Hide the "OK" button
+              }).then((result) => {
+                navigate("/login");
+              });
+            } else console.log("There was an error encountered.");
+          }
+        });
+      } else {
+        Swal.fire({
+          title: "Passwords did not match!",
+          text: "Please double check your passwords.",
+          icon: "warning",
+          showConfirmButton: false, // Hide the "OK" button
+        });
+      }
     } catch (err) {
       setErrorMsg(err.message);
     }
@@ -59,6 +70,10 @@ function Register() {
 
   const changePassword = (e) => {
     setPassword(e.target.value);
+  };
+
+  const changeCPassword = (e) => {
+    setCPassword(e.target.value);
   };
 
   return (
@@ -192,7 +207,7 @@ function Register() {
 }
 
 const registerUser = async (name, email, phone, password) => {
-  fetch("http://localhost:5000/api/register", {
+  fetch(`${API_URL}/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name, email, phone, password }),
